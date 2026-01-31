@@ -219,6 +219,56 @@ private:
 
 
 
+
+class SquareMapper : public PixelMapper {
+public:
+  SquareMapper() : parallel_(1) {}
+
+  virtual const char *GetName() const { return "SQR-mapper"; }
+
+  virtual bool SetParameters(int chain, int parallel, const char *param) {
+    fprintf(stderr, "\n\n\nHELLLLOOOOOO FROM SQR\n\n\n");
+    fprintf(stdout, "\n\n\nHELLLLOOOOOO FROM SQR\n\n\n");
+   
+    parallel_ = parallel;
+    return true;
+  }
+
+  virtual bool GetSizeMapping(int matrix_width, int matrix_height,
+                              int *visible_width, int *visible_height)
+    const {
+    *visible_width = 80;
+    *visible_height = 80;
+    return true;
+  }
+
+  virtual void MapVisibleToMatrix(int matrix_width, int matrix_height,
+                                  int x, int y,
+                                  int *matrix_x, int *matrix_y) const {
+    const int panel_height = matrix_height / parallel_;
+    const int visible_width = matrix_width;
+    const int slab_height = 2 * panel_height;   // one folded u-shape
+    const int base_y = (y / slab_height) * panel_height;
+    y %= slab_height;
+    if (y < 40) {
+      //x += 80;
+    } else {
+      //x = visible_width - x - 1;
+      //y = slab_height - y - 1;
+
+      x+=80;
+      y -= 40;
+    }
+    *matrix_x = x;
+    *matrix_y = base_y + y;
+  }
+
+private:
+  int parallel_;
+};
+
+
+
 class VerticalMapper : public PixelMapper {
 public:
   VerticalMapper() {}
@@ -302,6 +352,7 @@ static MapperByName *CreateMapperMap() {
   RegisterPixelMapperInternal(result, new UArrangementMapper());
   RegisterPixelMapperInternal(result, new VerticalMapper());
   RegisterPixelMapperInternal(result, new MirrorPixelMapper());
+  RegisterPixelMapperInternal(result, new SquareMapper());
   return result;
 }
 

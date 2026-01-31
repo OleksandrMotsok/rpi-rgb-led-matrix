@@ -27,7 +27,7 @@ graphics_ext = Extension(
 
 setup(
     name                = 'rgbmatrix',
-    version             = '0.0.1',
+    version             = '0.0.23',
     author              = 'Christoph Friedrich',
     author_email        = 'christoph.friedrich@vonaffenfels.de',
     classifiers         = ['Development Status :: 3 - Alpha'],

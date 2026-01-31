@@ -493,6 +493,46 @@ public:
   }
 };
 
+class CustomBlockMapper : public MultiplexMapperBase {
+ public:
+  CustomBlockMapper() : MultiplexMapperBase("16x8_block", 2) {}
+
+  // Основний метод, що мапить координати всередині однієї панелі
+  void MapSinglePanel(int x, int y, int* out_x, int* out_y) const override {
+    // Визначаємо блок
+    int block_x = x / 16;
+    int block_y = y / 8;
+
+    int local_x = x % 16;
+    int local_y = y % 8;
+
+    // Таблиця маппінгу блоків
+    const std::pair<int,int> block_mapping[4][4] = {
+      {{2,2}, {3,2}, {2,0}, {3,0}},
+      {{0,2}, {1,2}, {0,0}, {1,0}},
+      {{2,3}, {3,3}, {2,1}, {3,1}},
+      {{0,3}, {1,3}, {0,1}, {1,1}}
+    };
+
+    auto output_block = block_mapping[block_x][block_y];
+    int output_block_x = output_block.first;
+    int output_block_y = output_block.second;
+
+    // Фліп локальних координат всередині блоку
+    int output_local_x = 15 - local_x;
+    int output_local_y = 7 - local_y;
+
+    // Обчислюємо фінальні координати
+    x = output_block_x * 16 + output_local_x;
+    y = output_block_y * 8 + output_local_y;
+
+    const bool is_top_stripe = (y % (panel_rows_/2)) < panel_rows_/4;
+    *out_x = is_top_stripe ? x + panel_cols_ : x;
+    *out_y = ((y / (panel_rows_/2)) * (panel_rows_/4)
+                 + y % (panel_rows_/4));
+  }
+};
+
 
 /*
  * Here is where the registration happens.
@@ -523,6 +563,7 @@ static MuxMapperList *CreateMultiplexMapperList() {
   result->push_back(new P10Outdoor32x16HalfScanMapper());
   result->push_back(new P10Outdoor32x16QuarterScanMapper());
   result->push_back(new P3Outdoor64x64MultiplexMapper());
+  result->push_back(new CustomBlockMapper());
   return result;
 }
 
