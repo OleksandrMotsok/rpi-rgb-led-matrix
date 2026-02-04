@@ -533,6 +533,39 @@ class CustomBlockMapper : public MultiplexMapperBase {
   }
 };
 
+class CustomYMapper : public MultiplexMapperBase {
+public:
+  CustomYMapper() : MultiplexMapperBase("CustomY", 2) {
+    // Forward mapping: що передаємо → що реально на панелі
+
+    y_map[0]=0;   y_map[1]=1;   y_map[2]=2;   y_map[3]=3;
+    y_map[4]=8;   y_map[5]=9;   y_map[6]=10;  y_map[7]=11;
+    y_map[8]=16;  y_map[9]=17;  y_map[10]=4;  y_map[11]=5;
+    y_map[12]=6;  y_map[13]=7;  y_map[14]=12; y_map[15]=13;
+    y_map[16]=14; y_map[17]=15; y_map[18]=20; y_map[19]=21;
+    y_map[20]=18; y_map[21]=19; y_map[22]=24; y_map[23]=25;
+    y_map[24]=26; y_map[25]=27; y_map[26]=32; y_map[27]=33;
+    y_map[28]=34; y_map[29]=35; y_map[30]=22; y_map[31]=23;
+    y_map[32]=28; y_map[33]=29; y_map[34]=30; y_map[35]=31;
+    y_map[36]=36; y_map[37]=37; y_map[38]=38; y_map[39]=39;
+
+    base_mapper = new ZStripeMultiplexMapper("ZnMirrorZStripe", 4, 4);
+  }
+  
+  ~CustomYMapper() { delete base_mapper; }
+  
+  void MapSinglePanel(int x, int y, int *matrix_x, int *matrix_y) const {
+    // Спочатку маппимо Y через таблицю
+    int mapped_y = y_map[y];
+    
+    // Потім викликаємо базовий маппер
+    base_mapper->MapSinglePanel(x, mapped_y, matrix_x, matrix_y);
+  }
+  
+private:
+  int y_map[40];
+  ZStripeMultiplexMapper *base_mapper;
+};
 
 /*
  * Here is where the registration happens.
@@ -564,6 +597,7 @@ static MuxMapperList *CreateMultiplexMapperList() {
   result->push_back(new P10Outdoor32x16QuarterScanMapper());
   result->push_back(new P3Outdoor64x64MultiplexMapper());
   result->push_back(new CustomBlockMapper());
+  result->push_back(new CustomYMapper());
   return result;
 }
 
