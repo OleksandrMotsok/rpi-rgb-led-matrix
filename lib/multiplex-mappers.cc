@@ -567,6 +567,23 @@ private:
   ZStripeMultiplexMapper *base_mapper;
 };
 
+
+class QiangliQ4Outdoor10SMapper : public MultiplexMapperBase {
+public:
+  QiangliQ4Outdoor10SMapper() : MultiplexMapperBase("QiangliQ4-10S", 2) {}
+
+  void MapSinglePanel(int x, int y, int *matrix_x, int *matrix_y) const {
+    int half = y / 20;
+    int y_in_half = y % 20;
+    int y_block = y_in_half / 10;
+
+    *matrix_x = (x / 4) * 8 + y_block * 4 + (x % 4);
+    *matrix_y = (y_in_half % 10) + half * 10;
+  }
+};
+
+
+
 /*
  * Here is where the registration happens.
  * If you add an instance of the mapper here, it will automatically be
@@ -598,6 +615,9 @@ static MuxMapperList *CreateMultiplexMapperList() {
   result->push_back(new P3Outdoor64x64MultiplexMapper());
   result->push_back(new CustomBlockMapper());
   result->push_back(new CustomYMapper());
+
+  result->push_back(new QiangliQ4Outdoor10SMapper());
+
   return result;
 }
 
